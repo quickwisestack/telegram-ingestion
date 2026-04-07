@@ -105,35 +105,43 @@ async function saveJob(job) {
   });
 }
 
-// 🔥 TELEGRAM WEBHOOK
 app.post("/telegram", async (req, res) => {
-  try {
-    const message = req.body.message?.text;
 
-    if (!message) return res.sendStatus(200);
+  // ✅ Respond immediately (IMPORTANT)
+  res.sendStatus(200);
 
-    console.log("📩 Incoming Telegram message");
+  // 🔥 Run in background
+  (async () => {
+    try {
+      const message = req.body.message?.text;
 
-    const jobs = parseJobs(message);
+      if (!message) return;
 
-    console.log(`🧠 Parsed jobs: ${jobs.length}`);
+      console.log("📩 Incoming Telegram message");
 
-    for (const job of jobs) {
-      await saveJob(job);
-      console.log(`✅ Saved: ${job.company}`);
+      const jobs = parseJobs(message);
+
+      console.log(`🧠 Parsed jobs: ${jobs.length}`);
+
+      for (const job of jobs) {
+        try {
+          await saveJob(job);
+          console.log(`✅ Saved: ${job.company}`);
+
+          // small delay (optional)
+          await new Promise(r => setTimeout(r, 100));
+
+        } catch (err) {
+          console.error("❌ Save error:", err.message);
+        }
+      }
+
+      console.log("✅ Telegram processing done");
+
+    } catch (err) {
+      console.error("❌ Worker error:", err.message);
     }
-
-    res.sendStatus(200);
-
-  } catch (err) {
-    console.error("❌ Error:", err.message);
-    res.sendStatus(500);
-  }
-});
-
-// HEALTH CHECK
-app.get("/", (req, res) => {
-  res.send("Telegram ingestion running ✅");
+  })();
 });
 
 app.listen(3000, () => {
