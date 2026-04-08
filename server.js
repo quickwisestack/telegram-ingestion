@@ -134,13 +134,18 @@ app.post("/telegram", async (req, res) => {
 
       const jobs = parseJobs(message);
 
-   for (const job of jobs) {
-  const ok = await saveJob(job);
+  for (const job of jobs) {
+  try {
+    const ok = await saveJob(job);
 
-  if (ok) {
-    console.log("✅ Saved:", job.company);
-  } else {
-    console.log("❌ Not saved:", job.company);
+    if (ok) {
+      console.log("✅ Saved:", job.company);
+    } else {
+      console.log("❌ Not saved:", job.company);
+    }
+
+  } catch (err) {
+    console.log("⚠️ Skipped job due to error:", job.company);
   }
 }
     } catch (err) {
