@@ -80,6 +80,7 @@ function parseJobs(message) {
 
     // ❌ Skip invalid
     if (!isValidLink(job.apply_link)) continue;
+    if (!job.company && !job.title) continue;
 
     // ❌ Skip duplicates
     if (seen.has(job.apply_link)) continue;
@@ -101,7 +102,17 @@ async function saveJob(job) {
         "Content-Type": "application/json",
         Prefer: "return=representation"
       },
-      body: JSON.stringify(job)
+      body: JSON.stringify({
+  title: job.title || "Unknown Role",
+  company: job.company || "Unknown Company",
+  location: job.location || "India",
+  salary: job.salary || "",
+  experience: job.experience || "",
+  qualification: job.qualification || "",
+  description: `${job.title || ""} ${job.company || ""}`,
+  apply_link: job.apply_link || "",
+  source: "QuickwiseJobs"
+})
     });
 
     const data = await res.json();
