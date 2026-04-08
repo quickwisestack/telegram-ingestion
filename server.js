@@ -106,40 +106,26 @@ async function saveJob(job) {
 }
 
 app.post("/telegram", async (req, res) => {
+  console.log("📩 Telegram webhook HIT");
 
-  // ✅ Respond immediately (IMPORTANT)
-  res.sendStatus(200);
+  res.sendStatus(200); // respond fast
 
-  // 🔥 Run in background
   (async () => {
     try {
       const message = req.body.message?.text;
-
       if (!message) return;
 
-      console.log("📩 Incoming Telegram message");
+      console.log("📩 Message:", message);
 
       const jobs = parseJobs(message);
 
-      console.log(`🧠 Parsed jobs: ${jobs.length}`);
-
       for (const job of jobs) {
-        try {
-          await saveJob(job);
-          console.log(`✅ Saved: ${job.company}`);
-
-          // small delay (optional)
-          await new Promise(r => setTimeout(r, 100));
-
-        } catch (err) {
-          console.error("❌ Save error:", err.message);
-        }
+        await saveJob(job);
+        console.log("✅ Saved:", job.company);
       }
 
-      console.log("✅ Telegram processing done");
-
     } catch (err) {
-      console.error("❌ Worker error:", err.message);
+      console.error(err);
     }
   })();
 });
