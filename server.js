@@ -143,7 +143,15 @@ app.post("/telegram", async (req, res) => {
     }
   })();
 });
+// ✅ ROOT CHECK
+app.get("/", (req, res) => {
+  res.send("Telegram ingestion running ✅");
+});
 
+// ✅ TELEGRAM TEST ROUTE (GET)
+app.get("/telegram", (req, res) => {
+  res.send("Telegram webhook endpoint ready ✅");
+});
 app.listen(3000, () => {
   console.log("🚀 Telegram ingestion service running");
 });
