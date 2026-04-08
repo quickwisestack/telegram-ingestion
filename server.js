@@ -91,18 +91,33 @@ function parseJobs(message) {
   return jobs;
 }
 
-// 🔥 SAVE JOB
 async function saveJob(job) {
-  await fetch(`${SUPABASE_URL}/rest/v1/jobs`, {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal"
-    },
-    body: JSON.stringify(job)
-  });
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/jobs`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation"
+      },
+      body: JSON.stringify(job)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("❌ Supabase Insert Error:", data);
+      return false;
+    }
+
+    console.log("✅ DB Inserted:", job.company);
+    return true;
+
+  } catch (err) {
+    console.error("❌ Fetch Error:", err.message);
+    return false;
+  }
 }
 
 app.post("/telegram", async (req, res) => {
@@ -119,11 +134,15 @@ app.post("/telegram", async (req, res) => {
 
       const jobs = parseJobs(message);
 
-      for (const job of jobs) {
-        await saveJob(job);
-        console.log("✅ Saved:", job.company);
-      }
+   for (const job of jobs) {
+  const ok = await saveJob(job);
 
+  if (ok) {
+    console.log("✅ Saved:", job.company);
+  } else {
+    console.log("❌ Not saved:", job.company);
+  }
+}
     } catch (err) {
       console.error(err);
     }
