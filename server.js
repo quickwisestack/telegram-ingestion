@@ -112,7 +112,7 @@ app.post("/telegram", async (req, res) => {
 
   (async () => {
     try {
-      const message = req.body.message?.text;
+      const message = req.body.message?.text || req.body.channel_post?.text;
       if (!message) return;
 
       console.log("📩 Message:", message);
