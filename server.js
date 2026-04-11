@@ -11,7 +11,11 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY;
 // 🧠 Extract helper
 function extractField(line, key) {
   if (!line.includes(key)) return "";
-  return line.split(":")[1]?.trim() || "";
+  const idx = line.indexOf(":");
+  return line.substring(idx + 1).trim()
+    .replace(/\*/g, "")
+    .replace(/[🏢📍💰🎓👶🔍]/g, "")
+    .trim() || "";
 }
 
 // 🔥 VALIDATE LINK
@@ -69,7 +73,8 @@ function parseJobs(message) {
       }
 
       if (line.includes("http")) {
-        job.apply_link = line.trim();
+        const urlMatch = line.match(/https?:\/\/[^\s]+/);
+        if (urlMatch) job.apply_link = urlMatch[0].trim();
       }
     }
 
