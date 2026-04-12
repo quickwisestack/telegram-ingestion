@@ -12,9 +12,10 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY;
 function extractField(line, key) {
   if (!line.includes(key)) return "";
   const idx = line.indexOf(":");
-  return line.substring(idx + 1).trim()
+  return line.substring(idx + 1)
+    .trim()
     .replace(/\*/g, "")
-    .replace(/[🏢📍💰🎓👶🔍]/g, "")
+    .replace(/[^\x00-\x7F]/g, "")
     .trim() || "";
 }
 
